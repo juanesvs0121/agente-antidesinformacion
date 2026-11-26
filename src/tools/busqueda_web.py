@@ -1,11 +1,13 @@
 import os
+import time
+
 from dotenv import load_dotenv
 from tavily import TavilyClient
 
 load_dotenv()
 
 
-def buscar_en_web(consulta: str, max_resultados: int = 5) -> dict:
+def buscar_en_web(consulta: str, max_resultados: int = 3) -> dict:
     """Busca información actual en la web sobre un tema o afirmación.
 
     Úsala para contrastar la afirmación con medios y fuentes reales cuando
@@ -14,19 +16,29 @@ def buscar_en_web(consulta: str, max_resultados: int = 5) -> dict:
 
     Args:
         consulta: texto de búsqueda, corto y específico.
-        max_resultados: cantidad de resultados (máximo recomendado: 5).
+        max_resultados: cantidad de resultados (máximo recomendado: 3).
     """
-    try:
-        cliente = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
-        respuesta = cliente.search(query=consulta, max_results=max_resultados)
-    except Exception as e:
-        return {"resultados": [], "error": f"Fallo en la búsqueda web: {e}"}
+    print(f"[herramienta] Búsqueda web: {consulta}")
+
+    respuesta = None
+    ultimo_error = None
+    for _ in range(2):  # un reintento ante fallos de red intermitentes
+        try:
+            cliente = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+            respuesta = cliente.search(query=consulta, max_results=max_resultados)
+            break
+        except Exception as e:
+            ultimo_error = e
+            time.sleep(2)
+
+    if respuesta is None:
+        return {"resultados": [], "error": f"Fallo en la búsqueda web: {ultimo_error}"}
 
     resultados = [
         {
             "titulo": r.get("title"),
             "enlace": r.get("url"),
-            "extracto": (r.get("content") or "")[:500],
+            "extracto": (r.get("content") or "")[:300],
         }
         for r in respuesta.get("results", [])
     ]

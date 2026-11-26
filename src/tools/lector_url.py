@@ -1,7 +1,9 @@
+import time
+
 import requests
 import trafilatura
 
-MAX_CARACTERES = 6000
+MAX_CARACTERES = 3000
 
 ENCABEZADOS = {
     "User-Agent": (
@@ -22,14 +24,20 @@ def leer_url(url: str) -> dict:
     Args:
         url: dirección completa de la página, con https://.
     """
+    print(f"[herramienta] Leyendo URL: {url}")
     resultado = {"url": url, "titulo": None, "texto": "", "error": None}
 
-    try:
-        respuesta = requests.get(url, headers=ENCABEZADOS, timeout=15)
-        respuesta.raise_for_status()
-    except requests.RequestException as e:
-        resultado["error"] = f"No se pudo descargar la página: {e}"
-        return resultado
+    respuesta = None
+    for intento in range(2):  # un reintento ante fallos de red intermitentes
+        try:
+            respuesta = requests.get(url, headers=ENCABEZADOS, timeout=15)
+            respuesta.raise_for_status()
+            break
+        except requests.RequestException as e:
+            if intento == 1:
+                resultado["error"] = f"No se pudo descargar la página: {e}"
+                return resultado
+            time.sleep(2)
 
     html = respuesta.text
     texto = trafilatura.extract(html, include_comments=False, favor_precision=True)

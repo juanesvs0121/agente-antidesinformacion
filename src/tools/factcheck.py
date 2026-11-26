@@ -1,4 +1,5 @@
 import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -18,10 +19,12 @@ def buscar_verificaciones(afirmacion: str, idioma: str = "es") -> dict:
         afirmacion: texto breve de la afirmación a consultar.
         idioma: código de idioma de las verificaciones, por ejemplo 'es' o 'en'.
     """
+    print(f"[herramienta] Fact Check: {afirmacion}")
+
     params = {
         "query": afirmacion,
-        "languageCode": idioma,
-        "pageSize": 5,
+        "languageCode": idioma if idioma in ("es", "en") else "es",
+        "pageSize": 3,
         "key": os.getenv("FACTCHECK_API_KEY"),
     }
     try:
