@@ -1,3 +1,4 @@
+import re
 
 import streamlit as st
 
@@ -39,14 +40,16 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&display=swap');
 
 :root {
-    --paper: #F1EFE6;
-    --paper-light: #F9F8F2;
-    --ink: #202820;
-    --muted: #70756A;
-    --line: #D4D2C6;
-    --accent: #B44A38;
-    --accent-dark: #873C30;
-    --green: #536C56;
+    --paper: #EDF1F7;
+    --paper-light: #FBFCFE;
+    --ink: #0F1B33;
+    --body: #2A3650;
+    --muted: #5B6679;
+    --line: #D3DAE6;
+    --accent: #2B4FD8;
+    --accent-dark: #1E3799;
+    --accent-soft: #E4EAFB;
+    --shadow: 0 2px 10px rgba(15, 27, 51, 0.07);
 }
 
 .stApp,
@@ -82,7 +85,7 @@ footer {
 /* ---------------- SIDEBAR ---------------- */
 
 [data-testid="stSidebar"] {
-    background-color: #E8E6DC;
+    background-color: #E2E8F2;
     border-right: 1px solid var(--line);
 }
 
@@ -90,15 +93,14 @@ footer {
     padding-top: 2rem;
 }
 
-[data-testid="stSidebar"] p {
-    color: #515B50;
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] li {
+    color: var(--body);
     font-size: 0.91rem;
     line-height: 1.65;
 }
 
-[data-testid="stSidebar"] h2 {
-    font-family: 'Newsreader', serif;
-    font-weight: 500;
+[data-testid="stSidebar"] strong {
     color: var(--ink);
 }
 
@@ -129,16 +131,18 @@ footer {
     color: var(--accent-dark);
     margin-top: 1.5rem;
     margin-bottom: 0.6rem;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid #C3CCDD;
     padding-bottom: 0.5rem;
 }
 
 .side-note {
     font-size: 0.8rem;
     line-height: 1.6;
-    color: #62685E;
-    border-left: 2px solid var(--accent);
-    padding-left: 0.8rem;
+    color: var(--body);
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.8rem 0.9rem;
     margin-top: 1rem;
 }
 
@@ -146,21 +150,27 @@ footer {
 /* ---------------- BOTONES ---------------- */
 
 .stButton > button {
-    border-radius: 3px;
-    border: 1px solid var(--ink);
-    background: var(--ink);
-    color: var(--paper-light);
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #FFFFFF;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.76rem;
     letter-spacing: 0.3px;
     padding: 0.65rem 1rem;
-    transition: 0.2s ease;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
 }
 
 .stButton > button:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.stButton > button:active {
+    transform: translateY(0);
 }
 
 
@@ -184,7 +194,7 @@ footer {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0 0.9rem;
-    border-bottom: 3px double #A9A99B;
+    border-bottom: 3px double #A9B4C8;
 }
 
 .wordmark {
@@ -231,6 +241,7 @@ footer {
     letter-spacing: -2.8px;
     line-height: 0.99;
     margin: 0;
+    padding: 0;
 }
 
 .hero h1 em {
@@ -239,7 +250,7 @@ footer {
 }
 
 .hero-description {
-    color: #64695F;
+    color: var(--muted);
     font-size: 1rem;
     line-height: 1.7;
     max-width: 550px;
@@ -256,32 +267,36 @@ footer {
     color: var(--muted);
     border-bottom: 1px solid var(--line);
     padding-bottom: 0.7rem;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.9rem;
 }
 
 .welcome-item {
-    padding: 0.8rem 0.6rem 0.8rem 0;
-    border-bottom: 1px solid var(--line);
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.1rem 1.1rem 1.2rem;
+    height: 100%;
+    box-shadow: var(--shadow);
 }
 
 .welcome-number {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     color: var(--accent);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
 }
 
 .welcome-title {
     font-family: 'Newsreader', serif;
     font-size: 1.25rem;
     color: var(--ink);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
 }
 
 .welcome-description {
-    font-size: 0.79rem;
+    font-size: 0.82rem;
     color: var(--muted);
-    line-height: 1.5;
+    line-height: 1.55;
 }
 
 
@@ -290,45 +305,120 @@ footer {
 [data-testid="stChatMessage"] {
     background: var(--paper-light);
     border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.85rem;
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
 }
 
-[data-testid="stChatMessage"] p {
+/* Mensaje del usuario: tono distinto para diferenciarlo */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    background: var(--accent-soft);
+    border-left-color: var(--accent-dark);
+}
+
+/* Color explícito del texto: evita el gris claro heredado del tema oscuro */
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] li,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] strong,
+[data-testid="stChatMessage"] em,
+[data-testid="stChatMessage"] h1,
+[data-testid="stChatMessage"] h2,
+[data-testid="stChatMessage"] h3,
+[data-testid="stChatMessage"] td,
+[data-testid="stChatMessage"] th {
+    color: var(--ink);
+}
+
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] li {
+    font-size: 0.97rem;
     line-height: 1.7;
+}
+
+[data-testid="stChatMessage"] a {
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-word;
+}
+
+[data-testid="stChatMessage"] code {
+    color: var(--accent-dark);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+}
+
+[data-testid="stCaptionContainer"],
+[data-testid="stCaptionContainer"] p {
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
 }
 
 [data-testid="stChatMessage"] img {
     border: 1px solid var(--line);
+    border-radius: 10px;
 }
 
 .message-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.63rem;
     letter-spacing: 1px;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
+    color: var(--accent-dark);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+}
+
+.badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    margin-bottom: 0.8rem;
 }
 
 
 /* ---------------- ÁREA DE TEXTO ---------------- */
 
-[data-testid="stChatInput"] {
+[data-testid="stChatInput"],
+[data-testid="stChatInput"] > div {
     background: var(--paper-light);
-    border: 1px solid #BDBBAD;
-    border-radius: 3px;
-    box-shadow: 0 3px 12px rgba(32, 40, 32, 0.06);
+    border-radius: 14px;
+}
+
+[data-testid="stChatInput"] {
+    border: 1px solid #B8C3D6;
+    box-shadow: 0 4px 16px rgba(15, 27, 51, 0.10);
+}
+
+[data-testid="stChatInput"]:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43, 79, 216, 0.18);
 }
 
 [data-testid="stChatInput"] textarea {
+    background: transparent;
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 0.95rem;
     color: var(--ink);
+    caret-color: var(--accent);
 }
 
 [data-testid="stChatInput"] textarea::placeholder {
-    color: #929388;
+    color: #6B7588;
+    opacity: 1;
+}
+
+[data-testid="stChatInput"] button {
+    color: var(--accent);
 }
 
 
@@ -343,8 +433,16 @@ hr {
     border-color: var(--line);
 }
 
+[data-testid="stSpinner"] p {
+    color: var(--body);
+}
+
 div[data-testid="stSpinner"] > div {
     border-top-color: var(--accent) !important;
+}
+
+[data-testid="stAlert"] p {
+    color: var(--ink);
 }
 
 
@@ -569,13 +667,37 @@ if not st.session_state.mensajes:
 # FUNCIÓN PARA MOSTRAR RESPUESTAS
 # ==========================================================
 
+COLORES_VEREDICTO = {
+    "respaldada": ("#DDF3E8", "#0B5D3B"),
+    "falsa": ("#FBE3E3", "#9B1C1C"),
+    "engañosa": ("#FDEBD0", "#8A4B08"),
+    "parcialmente cierta": ("#FCF1C8", "#7A5A00"),
+    "no verificable": ("#E3E8F1", "#34405A"),
+}
+
+
 def mostrar_respuesta(contenido: str):
     """
-    Muestra la respuesta del agente y separa el contador
-    de tokens para presentarlo como información secundaria.
+    Muestra la respuesta del agente: etiqueta de veredicto, cuerpo
+    y contador de tokens como información secundaria.
     """
 
     cuerpo, separador, pie = contenido.partition("\n\n[Tokens")
+
+    coincidencia = re.search(r"\*\*Veredicto:\*\*\s*([^\n]+)", cuerpo)
+
+    if coincidencia:
+        veredicto = coincidencia.group(1).replace("*", "").strip()
+        clave = next(
+            (k for k in COLORES_VEREDICTO if veredicto.lower().startswith(k)),
+            None,
+        )
+        fondo, color = COLORES_VEREDICTO.get(clave, ("#E3E8F1", "#34405A"))
+        st.markdown(
+            f'<div class="badge" style="background:{fondo};color:{color};">'
+            f"{veredicto}</div>",
+            unsafe_allow_html=True,
+        )
 
     st.markdown(cuerpo)
 
